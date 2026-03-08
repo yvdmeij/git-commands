@@ -1,8 +1,3 @@
----
-layout: default
-title: Git Commands Cheatsheet
----
-
 # Git Commands
 
 | Command | Description |

@@ -1,3 +1,7 @@
+---
+title: Git Commands
+---
+
 # Git Commands
 
 | Command | Description |

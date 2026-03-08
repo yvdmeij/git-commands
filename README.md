@@ -10,6 +10,7 @@
 | `git reset <file>` | Unstage a specific file |
 
 ### Remote
+
 | Command | Description |
 | :--- | :--- |
 | `git remote -v` | Check the URL used for the remote branch |
@@ -18,6 +19,7 @@
 | `git remote update origin --prune` | Update local list and remove deleted remote branches |
 
 ### Push
+
 | Command | Description |
 | :--- | :--- |
 | `git push -u origin <branch>` | Push to remote and set upstream |
@@ -25,6 +27,7 @@
 | `git push -d origin <branch>` | Delete remote branch |
 
 ### Checkout & Switch
+
 | Command | Description |
 | :--- | :--- |
 | `git checkout -b <name>` | Create new branch and switch to it |
@@ -33,6 +36,7 @@
 | `git checkout <hash>` | Go to a specific commit |
 
 ### Log & Diff
+
 | Command | Description |
 | :--- | :--- |
 | `git log` | See local commits (`q` to exit) |
@@ -41,6 +45,7 @@
 | `git diff <branch1>..<branch2>` | Compare two branches |
 
 ### Stash
+
 | Command | Description |
 | :--- | :--- |
 | `git stash` | Record current state and return to clean directory |
@@ -50,6 +55,7 @@
 | `git stash drop <index>` | Remove a specific stash |
 
 ### Cleaning & Resetting
+
 | Command | Description |
 | :--- | :--- |
 | `git commit --amend` | Add forgotten changes to the last commit |

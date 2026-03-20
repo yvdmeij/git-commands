@@ -22,3 +22,7 @@ body {
 span, .credits.left, .credits.right {
     display: none !important;
 }
+
+section, #title {
+    margin: 0;
+}

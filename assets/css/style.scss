@@ -2,12 +2,13 @@
 ---
 @import "{{ site.theme }}";
 
-/* This removes the entire top bar (header) and the button */
-header {
+/* Targeting the specific ID you found */
+#header {
     display: none !important;
 }
 
-/* This fixes the spacing so your title isn't touching the top of the screen */
-#content {
-    padding-top: 60px !important;
+/* Optional: This cleans up the top margin so your content starts smoothly */
+.wrapper {
+    margin-top: 0 !important;
+    padding-top: 40px !important;
 }

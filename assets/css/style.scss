@@ -9,3 +9,12 @@
     padding: 0 !important;
     margin: 0 !important;
 }
+
+section, .wrapper, #content {
+    margin-top: 0 !important;
+    padding-top: 0px !important; /* Adjust this number to your liking */
+}
+
+body {
+    padding-top: 0 !important;
+}

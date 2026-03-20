@@ -1,3 +1,5 @@
+# Git Commands
+
 | Command | Description |
 | :--- | :--- |
 | `git init .` | Make folder a local git repo |

@@ -5,10 +5,7 @@
 /* Targeting the specific ID you found */
 #header {
     display: none !important;
-}
-
-/* Optional: This cleans up the top margin so your content starts smoothly */
-.wrapper {
-    margin-top: 0 !important;
-    padding-top: 40px !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }

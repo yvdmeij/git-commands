@@ -1,0 +1,13 @@
+---
+---
+@import "{{ site.theme }}";
+
+/* This removes the entire top bar (header) and the button */
+header {
+    display: none !important;
+}
+
+/* This fixes the spacing so your title isn't touching the top of the screen */
+#content {
+    padding-top: 60px !important;
+}

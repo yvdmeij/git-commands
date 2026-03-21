@@ -52,6 +52,16 @@
 | `git stash apply <index>` | Restore a specific stash (e.g., index 1) |
 | `git stash drop <index>` | Remove a specific stash |
 
+### Worktree
+
+| Command | Description |
+| :--- | :--- |
+| `git worktree add <path> <branch>` | Create a new directory and checkout a branch |
+| `git worktree list` | List all active worktrees linked to this repo |
+| `git worktree remove <path>` | Safely remove a worktree directory |
+| `git worktree prune` | Clean up stale worktree information |
+| `git worktree lock` / `unlock` | Prevent/allow worktree from being pruned |
+
 ### Cleaning & Resetting
 
 | Command | Description |

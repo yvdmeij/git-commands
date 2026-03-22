@@ -1,12 +1,3 @@
-| Command | Description |
-| :--- | :--- |
-| `git init .` | Make folder a local git repo |
-| `git status` | See all changes, staged and unstaged |
-| `git add -A` | Stage all changes |
-| `git commit -m 'MSG'` | Commit to local git |
-| `git restore .` | Restore all files |
-| `git reset <file>` | Unstage a specific file |
-
 ### Remote
 
 | Command | Description |

@@ -42,6 +42,7 @@
 | `git stash list` | List all stashed modifications |
 | `git stash apply <index>` | Restore a specific stash (e.g., index 1) |
 | `git stash drop <index>` | Remove a specific stash |
+| `git stash push -u -m "your message here"` | Stash all changes with a message |
 
 ### Worktree
 

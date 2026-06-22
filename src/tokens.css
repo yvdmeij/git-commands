@@ -1,0 +1,51 @@
+:root {
+  /* ── Violet Dusk palette ── */
+  --vd-deep:    #502D55;
+  --vd-mauve:   #935073;
+  --vd-peach:   #F6DBC0;
+  --vd-cream:   #F8F4E9;
+
+  /* ── Background ── */
+  --bg:         #1c1028;
+  --bg-2:       #231530;
+  --bg-card:    #2a1a38;
+  --bg-code:    #160e20;
+
+  /* ── Text ── */
+  --ink:        #F8F4E9;
+  --ink-2:      rgba(248, 244, 233, 0.65);
+  --ink-3:      rgba(248, 244, 233, 0.35);
+
+  /* ── Accent ── */
+  --accent:     #935073;
+  --accent-dim: rgba(147, 80, 115, 0.18);
+  --accent-glow:rgba(147, 80, 115, 0.35);
+
+  /* ── Borders ── */
+  --border:     rgba(248, 244, 233, 0.08);
+  --border-2:   rgba(248, 244, 233, 0.14);
+
+  /* ── Code token colors ── */
+  --tok-cmd:    #F6DBC0;   /* git keyword */
+  --tok-sub:    #c9a0dc;   /* subcommand */
+  --tok-flag:   #935073;   /* flags like -u, --soft */
+  --tok-arg:    #a8d8b9;   /* <branch>, <hash>, paths */
+  --tok-punct:  rgba(248, 244, 233, 0.4);
+
+  /* ── Typography ── */
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+
+  /* ── Motion ── */
+  --dur:        160ms;
+  --dur-slow:   240ms;
+  --ease:       cubic-bezier(0.25, 0, 0.25, 1);
+  --ease-out:   cubic-bezier(0, 0, 0.2, 1);
+
+  /* ── Radii ── */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  14px;
+  --r-xl:  20px;
+  --r-pill:9999px;
+}

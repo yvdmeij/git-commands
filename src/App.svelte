@@ -166,7 +166,7 @@
     background:
       radial-gradient(ellipse 60% 50% at 20% 20%, rgba(80, 45, 85, 0.35) 0%, transparent 60%),
       radial-gradient(ellipse 40% 60% at 80% 80%, rgba(147, 80, 115, 0.18) 0%, transparent 55%),
-      linear-gradient(160deg, #1c1028 0%, #231530 50%, #1a0e24 100%);
+      linear-gradient(160deg, #0a0610 0%, #110819 50%, #09060f 100%);
   }
 
   /* ── Sidebar ── */
@@ -181,7 +181,7 @@
     flex-direction: column;
     padding: 28px 16px 24px;
     border-right: 1px solid var(--border);
-    background: rgba(28, 16, 40, 0.7);
+    background: rgba(10, 6, 16, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }

@@ -2,7 +2,7 @@
   import CommandBlock from './lib/CommandBlock.svelte';
   import { sections } from './lib/commands';
 
-  let activeSection = $state<string | null>(null);
+  let activeSection = $state<string>(sections[0].id);
   let search = $state('');
   let copied = $state<string | null>(null);
   let light = $state(localStorage.getItem('theme') === 'light');
@@ -15,6 +15,22 @@
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }
+
+  $effect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) activeSection = entry.target.id;
+        });
+      },
+      { rootMargin: '-20% 0px -65% 0px', threshold: 0 }
+    );
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  });
 
   const filtered = $derived(
     search.trim().length === 0
@@ -46,42 +62,6 @@
 <div class="shell">
   <!-- Ambient background glow -->
   <div class="bg-glow" aria-hidden="true"></div>
-
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <nav class="nav">
-      {#each sections as s}
-        <button
-          class="nav-item {activeSection === s.id ? 'active' : ''}"
-          onclick={() => scrollTo(s.id)}
-        >
-          <span class="nav-dot"></span>
-          {s.title}
-        </button>
-      {/each}
-    </nav>
-
-    <div class="sidebar-footer">
-      <span>{sections.reduce((a, s) => a + s.commands.length, 0)} commands</span>
-      <button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
-        {#if light}
-          <!-- moon: switch back to dark -->
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        {:else}
-          <!-- sun: switch to light -->
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-        {/if}
-      </button>
-    </div>
-  </aside>
 
   <!-- Main content -->
   <main class="main">
@@ -164,6 +144,36 @@
   </div>
 {/if}
 
+<!-- Floating bottom nav -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    {#each sections as s}
+      <button
+        class="bottom-nav-item {activeSection === s.id ? 'active' : ''}"
+        onclick={() => scrollTo(s.id)}
+      >
+        {s.title}
+      </button>
+    {/each}
+    <div class="bottom-nav-sep"></div>
+    <button class="bottom-nav-toggle" onclick={toggleTheme} aria-label="Toggle theme">
+      {#if light}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      {:else}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      {/if}
+    </button>
+  </div>
+</nav>
+
 <style>
   .shell {
     display: flex;
@@ -183,142 +193,90 @@
       linear-gradient(160deg, #0a0610 0%, #110819 50%, #09060f 100%);
   }
 
-  /* ── Sidebar ── */
-  .sidebar {
+  /* ── Bottom nav ── */
+  .bottom-nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 220px;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    padding: 28px 16px 24px;
-    border-right: 1px solid var(--border);
-    background: rgba(10, 6, 16, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    max-width: calc(100vw - 32px);
   }
 
-  .sidebar-logo {
+  .bottom-nav-inner {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 0 8px 28px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 20px;
-  }
-
-  .logo-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--vd-deep), var(--vd-mauve));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--vd-cream);
-    flex: none;
-  }
-
-  .logo-text {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    letter-spacing: -0.01em;
-  }
-
-  .nav {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     gap: 2px;
-    overflow-y: auto;
+    padding: 5px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: var(--r-md);
+  .bottom-nav-inner::-webkit-scrollbar { display: none; }
+
+  .bottom-nav-item {
+    flex: none;
+    padding: 7px 14px;
+    border-radius: var(--r-pill);
     background: transparent;
     border: none;
     cursor: pointer;
-    color: var(--ink-2);
-    font-size: 13px;
+    color: rgba(26, 14, 36, 0.45);
+    font-size: 12.5px;
     font-weight: 500;
-    text-align: left;
-    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+    white-space: nowrap;
+    transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
   }
 
-  .nav-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--border-2);
+  .bottom-nav-item:hover {
+    color: rgba(26, 14, 36, 0.8);
+  }
+
+  .bottom-nav-item.active {
+    background: #502D55;
+    color: #F8F4E9;
+    box-shadow: 0 2px 8px rgba(80, 45, 85, 0.4);
+  }
+
+  .bottom-nav-sep {
+    width: 1px;
+    height: 16px;
+    background: rgba(26, 14, 36, 0.12);
+    margin: 0 4px;
     flex: none;
-    transition: background var(--dur) var(--ease);
   }
 
-  .nav-item:hover {
-    background: var(--accent-dim);
-    color: var(--ink);
-  }
-
-  .nav-item:hover .nav-dot,
-  .nav-item.active .nav-dot {
-    background: var(--accent);
-  }
-
-  .nav-item.active {
-    background: var(--accent-dim);
-    color: var(--vd-peach);
-    font-weight: 600;
-  }
-
-  .sidebar-footer {
-    padding: 16px 10px 0;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--ink-3);
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .theme-toggle {
+  .bottom-nav-toggle {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--r-pill);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(26, 14, 36, 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: var(--r-sm);
-    background: transparent;
-    border: 1px solid transparent;
-    cursor: pointer;
-    color: var(--ink-3);
-    transition: color var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
-    flex: none;
+    transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
   }
 
-  .theme-toggle:hover {
-    color: var(--accent);
-    background: var(--accent-dim);
-    border-color: var(--border-2);
+  .bottom-nav-toggle:hover {
+    color: rgba(26, 14, 36, 0.8);
+    background: rgba(26, 14, 36, 0.06);
   }
 
   /* ── Main ── */
   .main {
     flex: 1;
-    margin-left: 220px;
-    padding: 0 48px 96px;
+    padding: 0 48px 120px;
     position: relative;
     z-index: 1;
-    max-width: calc(100% - 220px);
+    max-width: 100%;
   }
 
   /* ── Hero ── */
@@ -480,7 +438,7 @@
   /* ── Toast ── */
   .toast {
     position: fixed;
-    bottom: 28px;
+    bottom: 88px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
@@ -508,8 +466,35 @@
     background: linear-gradient(135deg, #ffffff 0%, #F8F4E9 20%, #F6DBC0 45%, #935073 75%, #502D55 88%, #1D1A39 100%);
   }
 
-  :global([data-theme="light"]) .sidebar {
-    background: rgba(255, 255, 255, 0.92);
+  :global([data-theme="light"]) .bottom-nav-inner {
+    background: rgba(255, 255, 255, 0.80);
+    box-shadow: 0 8px 32px rgba(80, 45, 85, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  :global([data-theme="light"]) .bottom-nav-item {
+    color: rgba(26, 14, 36, 0.5);
+  }
+
+  :global([data-theme="light"]) .bottom-nav-item:hover {
+    color: #1a0e24;
+  }
+
+  :global([data-theme="light"]) .bottom-nav-item.active {
+    background: #1D1A39;
+    color: #F8F4E9;
+  }
+
+  :global([data-theme="light"]) .bottom-nav-sep {
+    background: rgba(26, 14, 36, 0.15);
+  }
+
+  :global([data-theme="light"]) .bottom-nav-toggle {
+    color: rgba(26, 14, 36, 0.5);
+  }
+
+  :global([data-theme="light"]) .bottom-nav-toggle:hover {
+    color: #1a0e24;
+    background: rgba(26, 14, 36, 0.06);
   }
 
   :global([data-theme="light"]) .search-wrap,
@@ -531,20 +516,9 @@
   :global([data-theme="light"] .copy-btn.copied) { color: var(--tok-arg); }
 
   /* ── Responsive ── */
-  @media (max-width: 900px) {
-    .sidebar {
-      display: none;
-    }
-    .main {
-      margin-left: 0;
-      max-width: 100%;
-      padding: 0 24px 80px;
-    }
-  }
-
   @media (max-width: 600px) {
     .main {
-      padding: 0 16px 64px;
+      padding: 0 16px 120px;
     }
     .hero {
       padding: 40px 0 40px;

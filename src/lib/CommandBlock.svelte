@@ -78,7 +78,6 @@
     grid-template-columns: 1fr;
     gap: 0;
     border-radius: var(--r-lg);
-    border: 1px solid var(--border);
     overflow: hidden;
     background: var(--bg-code);
     transition: border-color var(--dur) var(--ease);

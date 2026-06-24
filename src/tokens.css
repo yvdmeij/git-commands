@@ -51,8 +51,8 @@
 }
 
 :root[data-theme="light"] {
-  --bg:         #faf8fe;
-  --bg-2:       #f4f0fb;
+  --bg:         #F8F4E9;
+  --bg-2:       #F6DBC0;
   --bg-card:    #ffffff;
   --bg-code:    #ffffff;
 

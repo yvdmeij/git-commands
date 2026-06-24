@@ -46,7 +46,6 @@
 
 <div class="block" role="group">
   <div class="code-area">
-    <span class="prompt" aria-hidden="true">$</span>
     <code class="cmd">
       {#each tokens as tok}
         <span class="tok tok-{tok.type}">{tok.text}</span>
@@ -120,7 +119,7 @@
   :global(.tok-keyword) { color: var(--vd-peach);  font-weight: 500; }
   :global(.tok-sub)     { color: #c9a0dc; }
   :global(.tok-flag)    { color: var(--vd-mauve); }
-  :global(.tok-arg)     { color: #7ec8a4; }
+  :global(.tok-arg)     { color: #F59F59; }
   :global(.tok-punct)   { color: var(--ink-3); }
   :global(.tok-plain)   { color: var(--ink-2); }
 
@@ -152,7 +151,7 @@
 
   .copy-btn.copied {
     opacity: 1;
-    color: #7ec8a4;
+    color: #F59F59;
   }
 
   .desc {

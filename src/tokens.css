@@ -1,4 +1,4 @@
-:root {
+:root, :root[data-theme="dark"] {
   /* ── Violet Dusk palette ── */
   --vd-deep:    #502D55;
   --vd-mauve:   #935073;
@@ -29,7 +29,7 @@
   --tok-cmd:    #F6DBC0;   /* git keyword */
   --tok-sub:    #c9a0dc;   /* subcommand */
   --tok-flag:   #935073;   /* flags like -u, --soft */
-  --tok-arg:    #a8d8b9;   /* <branch>, <hash>, paths */
+  --tok-arg:    #F59F59;   /* <branch>, <hash>, paths */
   --tok-punct:  rgba(248, 244, 233, 0.4);
 
   /* ── Typography ── */
@@ -48,4 +48,28 @@
   --r-lg:  14px;
   --r-xl:  20px;
   --r-pill:9999px;
+}
+
+:root[data-theme="light"] {
+  --bg:         #faf8fe;
+  --bg-2:       #f4f0fb;
+  --bg-card:    #ffffff;
+  --bg-code:    #ffffff;
+
+  --ink:        #1a0e24;
+  --ink-2:      rgba(26, 14, 36, 0.65);
+  --ink-3:      rgba(26, 14, 36, 0.35);
+
+  --accent:     #7a3d6e;
+  --accent-dim: rgba(122, 61, 110, 0.10);
+  --accent-glow:rgba(122, 61, 110, 0.20);
+
+  --border:     rgba(26, 14, 36, 0.10);
+  --border-2:   rgba(26, 14, 36, 0.16);
+
+  --tok-cmd:    #502D55;
+  --tok-sub:    #7a3d6e;
+  --tok-flag:   #935073;
+  --tok-arg:    #AF445A;
+  --tok-punct:  rgba(26, 14, 36, 0.35);
 }

@@ -1,47 +1,53 @@
 <script lang="ts">
-  interface Props {
-    command: string;
-    description: string;
-    isCopied: boolean;
-    onCopy: () => void;
-  }
+interface Props {
+  command: string;
+  description: string;
+  isCopied: boolean;
+  onCopy: () => void;
+}
 
-  let { command, description, isCopied, onCopy }: Props = $props();
+let { command, description, isCopied, onCopy }: Props = $props();
 
-  // Tokenise the command string into coloured spans
-  interface Token { text: string; type: 'keyword' | 'sub' | 'flag' | 'arg' | 'punct' | 'plain' }
+// Tokenise the command string into coloured spans
+interface Token {
+  text: string;
+  type: 'keyword' | 'sub' | 'flag' | 'arg' | 'punct' | 'plain';
+}
 
-  function tokenize(cmd: string): Token[] {
-    const tokens: Token[] = [];
-    const parts = cmd.split(' ');
+function tokenize(cmd: string): Token[] {
+  const tokens: Token[] = [];
+  const parts = cmd.split(' ');
 
-    parts.forEach((part, i) => {
-      if (i > 0) tokens.push({ text: ' ', type: 'plain' });
+  parts.forEach((part, i) => {
+    if (i > 0) tokens.push({ text: ' ', type: 'plain' });
 
-      if (i === 0) {
-        tokens.push({ text: part, type: 'keyword' });
-      } else if (i === 1 && !part.startsWith('-') && !part.startsWith('<')) {
-        // subcommand (e.g. "remote", "stash", "worktree")
-        tokens.push({ text: part, type: 'sub' });
-      } else if (part.startsWith('--') || (part.startsWith('-') && part.length <= 3)) {
-        tokens.push({ text: part, type: 'flag' });
-      } else if (part.startsWith('<') && part.endsWith('>')) {
-        tokens.push({ text: part, type: 'arg' });
-      } else if (part.startsWith('<') || part.endsWith('>')) {
-        tokens.push({ text: part, type: 'arg' });
-      } else if (part === '/' || part === 'unlock') {
-        tokens.push({ text: part, type: 'punct' });
-      } else if (part.startsWith('"') || part.startsWith("'")) {
-        tokens.push({ text: part, type: 'arg' });
-      } else {
-        tokens.push({ text: part, type: 'plain' });
-      }
-    });
+    if (i === 0) {
+      tokens.push({ text: part, type: 'keyword' });
+    } else if (i === 1 && !part.startsWith('-') && !part.startsWith('<')) {
+      // subcommand (e.g. "remote", "stash", "worktree")
+      tokens.push({ text: part, type: 'sub' });
+    } else if (
+      part.startsWith('--') ||
+      (part.startsWith('-') && part.length <= 3)
+    ) {
+      tokens.push({ text: part, type: 'flag' });
+    } else if (part.startsWith('<') && part.endsWith('>')) {
+      tokens.push({ text: part, type: 'arg' });
+    } else if (part.startsWith('<') || part.endsWith('>')) {
+      tokens.push({ text: part, type: 'arg' });
+    } else if (part === '/' || part === 'unlock') {
+      tokens.push({ text: part, type: 'punct' });
+    } else if (part.startsWith('"') || part.startsWith("'")) {
+      tokens.push({ text: part, type: 'arg' });
+    } else {
+      tokens.push({ text: part, type: 'plain' });
+    }
+  });
 
-    return tokens;
-  }
+  return tokens;
+}
 
-  const tokens = $derived(tokenize(command));
+const tokens = $derived(tokenize(command));
 </script>
 
 <div class="block" role="group">

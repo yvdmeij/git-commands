@@ -1,62 +1,129 @@
 <script lang="ts">
-  import CommandBlock from './lib/CommandBlock.svelte';
-  import { sections } from './lib/commands';
+import {
+  GitBranch,
+  GitMerge,
+  Globe,
+  History,
+  Layers,
+  Layout,
+  RotateCcw,
+  Shield,
+  Upload,
+} from 'lucide-svelte';
+import CommandBlock from './lib/CommandBlock.svelte';
+import { sections } from './lib/commands';
 
-  let activeSection = $state<string>(sections[0].id);
-  let search = $state('');
-  let copied = $state<string | null>(null);
-  let light = $state(localStorage.getItem('theme') === 'light');
+const iconMap: Record<string, typeof Globe> = {
+  globe: Globe,
+  upload: Upload,
+  'git-branch': GitBranch,
+  history: History,
+  layers: Layers,
+  layout: Layout,
+  'rotate-ccw': RotateCcw,
+  'git-merge': GitMerge,
+  shield: Shield,
+};
 
-  if (light) document.documentElement.setAttribute('data-theme', 'light');
+let activeSection = $state<string>(sections[0].id);
+let menuOpen = $state(false);
+let search = $state('');
 
-  function toggleTheme() {
-    light = !light;
-    const theme = light ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
+let copied = $state<string | null>(null);
+let light = $state(localStorage.getItem('theme') === 'light');
+
+if (light) document.documentElement.setAttribute('data-theme', 'light');
+
+function applyTheme() {
+  light = !light;
+  const theme = light ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+}
+
+type ViewTransitionDoc = Document & {
+  startViewTransition?: (cb: () => void) => { ready: Promise<void> };
+};
+
+function toggleTheme(e: MouseEvent) {
+  const doc = document as ViewTransitionDoc;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Fallback for browsers without the View Transitions API (or reduced motion)
+  if (!doc.startViewTransition || reduced) {
+    applyTheme();
+    return;
   }
 
-  $effect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) activeSection = entry.target.id;
-        });
-      },
-      { rootMargin: '-20% 0px -65% 0px', threshold: 0 }
-    );
-    sections.forEach(s => {
-      const el = document.getElementById(s.id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  });
-
-  const filtered = $derived(
-    search.trim().length === 0
-      ? sections
-      : sections
-          .map(s => ({
-            ...s,
-            commands: s.commands.filter(
-              c =>
-                c.cmd.toLowerCase().includes(search.toLowerCase()) ||
-                c.desc.toLowerCase().includes(search.toLowerCase())
-            ),
-          }))
-          .filter(s => s.commands.length > 0)
+  // Circular reveal expanding from the toggle button
+  const x = e.clientX;
+  const y = e.clientY;
+  const endRadius = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y),
   );
 
-  function copyCmd(cmd: string) {
-    navigator.clipboard.writeText(cmd);
-    copied = cmd;
-    setTimeout(() => (copied = null), 1800);
-  }
+  const transition = doc.startViewTransition(() => applyTheme());
+  transition.ready.then(() => {
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${endRadius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration: 520,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        pseudoElement: '::view-transition-new(root)',
+      },
+    );
+  });
+}
 
-  function scrollTo(id: string) {
-    activeSection = id;
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+$effect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) activeSection = entry.target.id;
+      });
+    },
+    { rootMargin: '-20% 0px -65% 0px', threshold: 0 },
+  );
+  sections.forEach((s) => {
+    const el = document.getElementById(s.id);
+    if (el) observer.observe(el);
+  });
+  return () => observer.disconnect();
+});
+
+const filtered = $derived(
+  search.trim().length === 0
+    ? sections
+    : sections
+        .map((s) => ({
+          ...s,
+          commands: s.commands.filter(
+            (c) =>
+              c.cmd.toLowerCase().includes(search.toLowerCase()) ||
+              c.desc.toLowerCase().includes(search.toLowerCase()),
+          ),
+        }))
+        .filter((s) => s.commands.length > 0),
+);
+
+function copyCmd(cmd: string) {
+  navigator.clipboard.writeText(cmd);
+  copied = cmd;
+  setTimeout(() => (copied = null), 1800);
+}
+
+function scrollTo(id: string) {
+  activeSection = id;
+  document
+    .getElementById(id)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 </script>
 
 <div class="shell">
@@ -144,24 +211,21 @@
   </div>
 {/if}
 
-<!-- Floating bottom nav -->
-<nav class="bottom-nav">
-  <div class="bottom-nav-inner">
-    {#each sections as s}
-      <button
-        class="bottom-nav-item {activeSection === s.id ? 'active' : ''}"
-        onclick={() => scrollTo(s.id)}
-      >
-        {s.title}
-      </button>
-    {/each}
-    <div class="bottom-nav-sep"></div>
-    <button class="bottom-nav-toggle" onclick={toggleTheme} aria-label="Toggle theme">
-      {#if light}
+<!-- FAB backdrop -->
+{#if menuOpen}
+  <div class="fab-backdrop" onclick={() => menuOpen = false} aria-hidden="true"></div>
+{/if}
+
+<!-- FAB nav -->
+<div class="fab-nav">
+  <div class="fab-bar">
+    <button class="fab-theme {light ? 'is-light' : ''}" onclick={toggleTheme} aria-label="Toggle theme">
+      <span class="theme-icon theme-icon--moon" aria-hidden="true">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
-      {:else}
+      </span>
+      <span class="theme-icon theme-icon--sun" aria-hidden="true">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"/>
           <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
@@ -169,10 +233,31 @@
           <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
-      {/if}
+      </span>
+    </button>
+    <button class="fab-btn {menuOpen ? 'is-open' : ''}" onclick={() => menuOpen = !menuOpen} aria-label="Toggle menu">
+      <span class="fab-cross" aria-hidden="true">
+        <span class="fab-cross-bar fab-cross-bar--h"></span>
+        <span class="fab-cross-bar fab-cross-bar--v"></span>
+      </span>
     </button>
   </div>
-</nav>
+
+  {#if menuOpen}
+    <div class="fab-menu">
+      {#each sections as s}
+        {@const Icon = iconMap[s.icon]}
+        <button
+          class="fab-menu-item {activeSection === s.id ? 'active' : ''}"
+          onclick={() => { scrollTo(s.id); menuOpen = false; }}
+        >
+          <Icon size={14} strokeWidth={2} />
+          {s.title}
+        </button>
+      {/each}
+    </div>
+  {/if}
+</div>
 
 <style>
   .shell {
@@ -193,81 +278,177 @@
       linear-gradient(160deg, #0a0610 0%, #110819 50%, #09060f 100%);
   }
 
-  /* ── Bottom nav ── */
-  .bottom-nav {
+  /* ── FAB nav ── */
+  .fab-backdrop {
     position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    max-width: calc(100vw - 32px);
+    inset: 0;
+    z-index: 99;
   }
 
-  .bottom-nav-inner {
+  .fab-nav {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 100;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .fab-menu {
+    display: flex;
+    flex-direction: column;
     gap: 2px;
-    padding: 5px;
-    border-radius: var(--r-pill);
-    background: rgba(255, 255, 255, 0.82);
+    padding: 6px;
+    border-radius: var(--r-lg);
+    background: rgba(40, 15, 58, 0.92);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    overflow-x: auto;
-    scrollbar-width: none;
+    border: 1px solid rgba(147, 80, 115, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(147, 80, 115, 0.15);
+    animation: fab-menu-in var(--dur) var(--ease-out);
+    transform-origin: top right;
   }
 
-  .bottom-nav-inner::-webkit-scrollbar { display: none; }
+  @keyframes fab-menu-in {
+    from { opacity: 0; transform: scale(0.92) translateY(-8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
 
-  .bottom-nav-item {
-    flex: none;
-    padding: 7px 14px;
-    border-radius: var(--r-pill);
+  .fab-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px 9px 12px;
+    border-radius: var(--r-md);
     background: transparent;
     border: none;
     cursor: pointer;
-    color: rgba(26, 14, 36, 0.45);
-    font-size: 12.5px;
+    color: rgba(248, 244, 233, 0.6);
+    font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
+    width: 100%;
     transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
   }
 
-  .bottom-nav-item:hover {
-    color: rgba(26, 14, 36, 0.8);
+  .fab-menu-item:hover {
+    color: rgba(248, 244, 233, 0.9);
+    background: rgba(147, 80, 115, 0.15);
   }
 
-  .bottom-nav-item.active {
-    background: #502D55;
+  .fab-menu-item.active {
+    background: rgba(147, 80, 115, 0.38);
     color: #F8F4E9;
-    box-shadow: 0 2px 8px rgba(80, 45, 85, 0.4);
   }
 
-  .bottom-nav-sep {
-    width: 1px;
-    height: 16px;
-    background: rgba(26, 14, 36, 0.12);
-    margin: 0 4px;
-    flex: none;
+  .fab-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .bottom-nav-toggle {
-    flex: none;
-    width: 30px;
-    height: 30px;
-    border-radius: var(--r-pill);
+  .fab-theme {
+    position: relative;
+    width: 34px;
+    height: 34px;
     background: transparent;
     border: none;
     cursor: pointer;
-    color: rgba(26, 14, 36, 0.45);
+    color: rgba(248, 244, 233, 0.55);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+    transition: color var(--dur) var(--ease), transform var(--dur) var(--ease);
   }
 
-  .bottom-nav-toggle:hover {
-    color: rgba(26, 14, 36, 0.8);
-    background: rgba(26, 14, 36, 0.06);
+  .fab-theme:hover {
+    color: rgba(248, 244, 233, 0.95);
+    transform: scale(1.12);
+  }
+
+  /* Sun ↔ moon crossfade */
+  .theme-icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--dur-slow) var(--ease),
+                transform var(--dur-slow) var(--ease);
+  }
+
+  .theme-icon--moon {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.4);
+  }
+  .theme-icon--sun {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+
+  .fab-theme.is-light .theme-icon--moon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+  .fab-theme.is-light .theme-icon--sun {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.4);
+  }
+
+  .fab-btn {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(248, 244, 233, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .fab-btn:hover {
+    color: #F8F4E9;
+    transform: scale(1.12);
+  }
+
+  /* Plus → X morph */
+  .fab-cross {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  .fab-cross-bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: currentColor;
+    border-radius: var(--r-pill);
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  .fab-cross-bar--h {
+    width: 16px;
+    height: 2.5px;
+    transform: translate(-50%, -50%);
+  }
+  .fab-cross-bar--v {
+    width: 2.5px;
+    height: 16px;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Spin 135° so the plus sweeps round and lands as an X */
+  .fab-btn.is-open .fab-cross {
+    transform: rotate(135deg);
+  }
+  /* Collapse one bar slightly for a tighter, balanced ✕ */
+  .fab-btn.is-open .fab-cross-bar--v {
+    transform: translate(-50%, -50%) scaleY(0.92);
   }
 
   /* ── Main ── */
@@ -372,7 +553,7 @@
     display: flex;
     flex-direction: column;
     gap: 56px;
-    max-width: 800px;
+    max-width: 680px;
   }
 
   .section {
@@ -438,7 +619,7 @@
   /* ── Toast ── */
   .toast {
     position: fixed;
-    bottom: 88px;
+    bottom: 32px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
@@ -466,35 +647,40 @@
     background: linear-gradient(135deg, #ffffff 0%, #F8F4E9 20%, #F6DBC0 45%, #935073 75%, #502D55 88%, #1D1A39 100%);
   }
 
-  :global([data-theme="light"]) .bottom-nav-inner {
-    background: rgba(255, 255, 255, 0.80);
-    box-shadow: 0 8px 32px rgba(80, 45, 85, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  :global([data-theme="light"]) .fab-menu {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(147, 80, 115, 0.2);
+    box-shadow: 0 8px 32px rgba(80, 45, 85, 0.15);
   }
 
-  :global([data-theme="light"]) .bottom-nav-item {
-    color: rgba(26, 14, 36, 0.5);
+  :global([data-theme="light"]) .fab-menu-item {
+    color: rgba(26, 14, 36, 0.6);
   }
 
-  :global([data-theme="light"]) .bottom-nav-item:hover {
+  :global([data-theme="light"]) .fab-menu-item:hover {
     color: #1a0e24;
+    background: rgba(147, 80, 115, 0.08);
   }
 
-  :global([data-theme="light"]) .bottom-nav-item.active {
+  :global([data-theme="light"]) .fab-menu-item.active {
     background: #1D1A39;
     color: #F8F4E9;
   }
 
-  :global([data-theme="light"]) .bottom-nav-sep {
-    background: rgba(26, 14, 36, 0.15);
+  :global([data-theme="light"]) .fab-theme {
+    color: rgba(26, 14, 36, 0.55);
   }
 
-  :global([data-theme="light"]) .bottom-nav-toggle {
-    color: rgba(26, 14, 36, 0.5);
-  }
-
-  :global([data-theme="light"]) .bottom-nav-toggle:hover {
+  :global([data-theme="light"]) .fab-theme:hover {
     color: #1a0e24;
-    background: rgba(26, 14, 36, 0.06);
+  }
+
+  :global([data-theme="light"]) .fab-btn {
+    color: rgba(26, 14, 36, 0.85);
+  }
+
+  :global([data-theme="light"]) .fab-btn:hover {
+    color: #1a0e24;
   }
 
   :global([data-theme="light"]) .search-wrap,
@@ -514,6 +700,29 @@
   :global([data-theme="light"] .tok-sub)     { color: var(--tok-sub); }
   :global([data-theme="light"] .tok-arg)     { color: var(--tok-arg); }
   :global([data-theme="light"] .copy-btn.copied) { color: var(--tok-arg); }
+
+  /* ── Theme view-transition (circular reveal) ── */
+  /* Disable the default cross-fade so the clip-path circle reads cleanly */
+  :global(::view-transition-old(root)),
+  :global(::view-transition-new(root)) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  /* New (incoming) theme is revealed on top by the expanding circle */
+  :global(::view-transition-old(root)) {
+    z-index: 1;
+  }
+  :global(::view-transition-new(root)) {
+    z-index: 9999;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-icon,
+    .fab-cross,
+    .fab-cross-bar {
+      transition: none;
+    }
+  }
 
   /* ── Responsive ── */
   @media (max-width: 600px) {

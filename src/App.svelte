@@ -30,9 +30,13 @@ let menuOpen = $state(false);
 let search = $state('');
 
 let copied = $state<string | null>(null);
-let light = $state(localStorage.getItem('theme') === 'light');
+const savedTheme = localStorage.getItem('theme');
+const initialLight = savedTheme
+  ? savedTheme === 'light'
+  : window.matchMedia('(prefers-color-scheme: light)').matches;
+let light = $state(initialLight);
 
-if (light) document.documentElement.setAttribute('data-theme', 'light');
+document.documentElement.setAttribute('data-theme', initialLight ? 'light' : 'dark');
 
 function applyTheme() {
   light = !light;

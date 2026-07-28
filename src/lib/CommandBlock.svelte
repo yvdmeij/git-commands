@@ -95,7 +95,7 @@ const tokens = $derived(tokenize(command));
 
   .code-area {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     padding: 14px 16px;
     background: var(--bg-code);
@@ -116,8 +116,10 @@ const tokens = $derived(tokenize(command));
     font-size: 13.5px;
     line-height: 1.5;
     flex: 1;
-    white-space: pre-wrap;
-    word-break: break-all;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   /* Token colours */

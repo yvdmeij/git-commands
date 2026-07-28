@@ -108,14 +108,29 @@ export const sections: Section[] = [
     id: 'worktree',
     title: 'Worktree',
     icon: 'layout',
+    notes: [
+      'The -C flag tells Git to run the command from a specific repository directory instead of your current folder.',
+    ],
     commands: [
+      {
+        cmd: 'git -C E:\\Repositories\\<name-of-app> fetch origin develop',
+        desc: 'Fetch the latest develop branch from the remote before creating a feature worktree',
+      },
+      {
+        cmd: 'git -C E:\\Repositories\\<name-of-app> worktree add E:\\Repositories\\<name-of-app>\\feature\\<name-of-feature> -b feature/<name-of-feature> origin/develop',
+        desc: 'Create a new worktree and branch from the develop branch',
+      },
+      {
+        cmd: 'git -C E:\\Repositories\\<name-of-app>\\feature\\<name-of-feature> push -u origin feature/<name-of-feature>',
+        desc: 'Push the new feature branch and set upstream tracking',
+      },
+      {
+        cmd: 'git -C E:\\Repositories\\<name-of-app> worktree list',
+        desc: 'Verify all active worktrees linked to the repository',
+      },
       {
         cmd: 'git worktree add <path> <branch>',
         desc: 'Create a new directory and checkout a branch',
-      },
-      {
-        cmd: 'git worktree list',
-        desc: 'List all active worktrees linked to this repo',
       },
       {
         cmd: 'git worktree remove <path>',
